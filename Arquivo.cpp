@@ -11,6 +11,37 @@ string Arquivo::line(ifstream &ifs) {
     return line;
 }
 
+void Arquivo::gravarSessao(Sessao sessao) {
+    string path = "../data/sessao_" + sessao.nome + ".txt";
+    ofstream ofs(path, fstream::trunc);
+    if (!ofs.good()) {
+        cout << "Falha ao criar o arquivo" << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    ofs << "sessao{" << endl;
+    ofs << "\t" << sessao.nome << endl;
+    gravaSecretarias(ofs, sessao.secretarias);
+    ofs << "}" << endl;
+}
+
+void Arquivo::gravaSecretarias(ofstream &ofs, vector<Secretaria> secretarias) {
+    for (Secretaria s : secretarias) {
+        ofs << "\tsecretaria{" << endl;
+        ofs << "\t\t" << s.nome << endl;
+        gravaCandidatos(ofs, s.candidatos);
+        ofs << "\t}" << endl;
+    }
+}
+
+void Arquivo::gravaCandidatos(ofstream &ofs, vector<Candidato> candidatos) {
+    ofs << "\t\tcandidatos{" << endl;
+    for (Candidato c : candidatos) {
+        ofs << "\t\t\t" << c.cargo << ";" << c.nome << ";" << c.votos << endl;
+    }
+    ofs << "\t\t}" << endl;
+}
+
 Sessao Arquivo::carregarArquivo(string path) {
     ifstream ifs(path, fstream::app);
     if (!ifs.good()) {
@@ -54,7 +85,7 @@ Secretaria Arquivo::carregaSecretaria(ifstream &ifs) {
         string line(Arquivo::line(ifs));
         if (line.compare("candidatos{") == 0) {
             vector<Candidato> candidatos = carregaCandidatos(ifs);
-            secretaria.setCandidatos(candidatos);
+            secretaria.candidatos = candidatos;
             continue;
 
         } else if (line.compare("}") == 0) {
@@ -77,7 +108,6 @@ vector<Candidato> Arquivo::carregaCandidatos(ifstream &ifs) {
 
         std::cmatch matches;
         std::regex_match(line.c_str(), matches, std::regex("^([a-zA-Z]+);([a-zA-Z]+);([0-9]+)$"));
-        //cout << "matches: " << matches.size() << endl;
 
         if (matches.size() == 4) {
             Candidato c(matches.str(1), matches.str(2), stoi(matches.str(3)));

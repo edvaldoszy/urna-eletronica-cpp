@@ -14,7 +14,6 @@ public:
     vector<Candidato> candidatos;
 
     Secretaria(string nome);
-    void setCandidatos(vector<Candidato> candidatos);
 };
 
 
