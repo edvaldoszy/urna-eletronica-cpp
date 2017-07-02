@@ -1,10 +1,43 @@
 #include <iostream>
-#include <fstream>
 #include <regex>
 #include "Sessao.h"
 #include "Arquivo.h"
 
 using namespace std;
+
+void criaSessao(string nomeSessao) {
+    Sessao sessao(nomeSessao);
+    Arquivo::gravarSessao(sessao);
+    cout << "Sessao \"" + sessao.nome << "\" criada com sucesso" << endl;
+}
+
+void criaSecretaria(Sessao sessao) {
+    cout << "Nome da secretaria: ";
+    string nomeSecretaria;
+    cin >> nomeSecretaria;
+
+    Secretaria secretaria(nomeSecretaria);
+
+    string nomeCandidato;
+    cout << "Nome do candidato (0 para sair): ";
+    cin >> nomeCandidato;
+
+    while (nomeCandidato.compare("0") != 0) {
+        cout << "Nome o cargo do candidato: ";
+        string cargoCandidato;
+        cin >> cargoCandidato;
+
+        Candidato candidato = (* new Candidato(cargoCandidato, nomeCandidato, 0));
+        secretaria.candidatos.push_back(candidato);
+
+        cout << "Nome do candidato (0 para sair): ";
+        cin >> nomeCandidato;
+    }
+
+    sessao.secretarias.push_back(secretaria);
+    Arquivo::gravarSessao(sessao);
+    cout << "Secretaria criada com sucesso" << endl;
+}
 
 void grava() {
 
@@ -28,18 +61,6 @@ Sessao carrega(string nomeSessao) {
 
     cout << "Sessao: " << sessao.nome << endl;
     return sessao;
-
-    //sessao.nome = "teste1";
-    //Arquivo::gravarSessao(sessao);
-
-    //for (Secretaria s : sessao.secretarias) {
-    //    cout << "\tsecretaria: " << s.nome << endl;
-    //    for (Candidato c : s.candidatos) {
-    //        cout << "\t\tcandidato: " << c.cargo << " - " << c.nome << " - " << c.votos << endl;
-    //    }
-    //}
-
-    //exit(EXIT_SUCCESS);
 }
 
 void mostra(string nomeSessao) {
@@ -74,21 +95,25 @@ void vota(Sessao sessao, string nomeCandidato) {
 }
 
 int main(int argc, char* argv[]) {
-    //cout << "count: " << argc << endl;
 
     string flag(argv[1]);
     if (flag.compare("sessao") == 0) {
-        Sessao sessao = carrega(argv[2]);
 
         string command(argv[3]);
-        if (command.compare("votar") == 0) {
+        if (command.compare("criar") == 0) {
+            criaSessao(argv[2]);
+            return EXIT_SUCCESS;
+        }
+
+        Sessao sessao = carrega(argv[2]);
+        if (command.compare("criarSecretaria") == 0) {
+            criaSecretaria(sessao);
+
+        } else if (command.compare("votar") == 0) {
             vota(sessao, argv[4]);
 
         } else if (command.compare("mostrar") == 0) {
             mostra(argv[2]);
         }
     }
-
-    //grava();
-    //carrega("fp123");
 }
